@@ -46,5 +46,5 @@ class DaoSell:
 
         sold =[]
         for i in cls.sell:
-            sold.append(Sell(Products(i[0], i[1], i[2]), i[3], i[4], i[5]))
+            sold.append(Sell(Products(i[0], i[1], i[2]), i[3], i[4], i[5], i[6]))
         return sold
