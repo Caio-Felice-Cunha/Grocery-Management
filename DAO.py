@@ -61,17 +61,17 @@ class DaoInventory:
 
     @classmethod
     def read(cls):
-        with open('inventory.txt', 'a') as arc:
+        with open('inventory.txt', 'r') as arc:
             cls.inventory = arc.readlines()
 
         cls.inventory = list(map(lambda x: x.replace('\n', ''), cls.inventory))
 
-        cls.inventory - list(map(lambda x: x.split("|"), cls.inventory))
+        cls.inventory = list(map(lambda x: x.split("|"), cls.inventory))
 
         inv=[]
         if len(cls.inventory) > 0:
-            for i in cls.Inventory:
-                inv.append(Inventory(Products(i[0], i[1], i[2], i[3])))
+            for i in cls.inventory:
+                inv.append(Inventory(Products(i[0], i[1], i[2]), i[3]))
 
         return inv
         
