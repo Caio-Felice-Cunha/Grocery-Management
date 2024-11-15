@@ -1,8 +1,7 @@
+from itertools import product
 from Models import *
 from DAO import *
 from datetime import datetime
-
-
 
 class ControllerCategory:
     def registerCategory(self, newCategory):
@@ -76,5 +75,48 @@ class ControllerCategory:
             for i in categories:
                 print(f'Category: {i.category}')
 
-a = ControllerCategory()
-a.showCategory()
+class ControllerInventory:
+    def registerProduct(self, name, price, category, quantity):
+        x = DaoInventory.read()
+        y = DaoCategory.read()
+
+        h = list(filter(lambda x: x.category == category, y))
+        inv = list(filter(lambda x: x.product.name == name, x))
+
+        if len(h) > 0:
+            if len(inv) == 0:
+                product = Products(name, price, category)
+                DaoInventory.save(product, quantity)
+                print(f'Product {name} successfully registered')
+            
+            else: 
+                print(f'The product {name} is already registered')
+        else:
+            print(f'This category {category} does not exist')
+
+    def removeProduct(self, name):
+        x = DaoInventory.read()
+        
+        inv = list(filter(lambda x: x.product.name == name, x))
+
+        if len(inv) > 0:
+            for i in range(len(x)):
+                if x[i].product.name == name:
+                    del x[i]
+                    break
+            print(f'The product {name} was removed successfully')
+
+        else:
+            print(f'The product {name} does not exist')
+
+        with open('inventory.txt', 'w') as arc:
+            for i in x: 
+                arc.writelines(i.product.name + "|"
+                               + i.product.price + "|"
+                               + i.product.category + "|"
+                               + str(i.quantity))
+        
+
+
+a = ControllerInventory()
+a.removeProduct('banana')
