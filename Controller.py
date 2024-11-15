@@ -170,5 +170,52 @@ class ControllerInventory:
                 
                 print('----------')
 
-a = ControllerInventory()
-a.showInventory()
+class ControllerSell:
+    def registerSale(self, productName, salesperson, buyer, saleQuantity):
+        x = DaoInventory.read()
+        temp = []
+
+        exist = False
+        quantity = False 
+
+        for i in x:
+            if exist == False:
+
+                if i.product.name == productName:
+                    exist = True
+
+                    if i.quantity >= saleQuantity:
+                        quantity = True
+                        i.quantity = int(i.quantity) - int(saleQuantity)
+
+                        sold = Sell(Products(i.product.name, i.product.price, i.product.category), salesperson, buyer, saleQuantity)
+                        saleValue = int(saleQuantity) * int(i.product.price)
+
+                        DaoSell.save(sold)
+
+            temp.append([Products(i.product.name, i.product.price, i.product.category), i.quantity])
+
+            arc = open('inventory.txt', 'w')
+            arc.write("")
+        
+            for i in temp:
+                with open('inventory.txt', 'a') as arc:
+                    arc.writelines(i[0].name + "|"
+                                   + i[0].price  + "|"
+                                   + i[0].category + "|"
+                                   + str(i[1]))
+                    arc.writelines('\n')
+
+            if exist == False:
+                print(f'The product {productName} does not exist')
+                return None
+            elif not quantity:
+                print(f'Not enough of {productName} in the inventory.')
+                return None
+            else:
+                print(f'Sale completed successfully')
+                return saleValue
+            
+
+
+            
