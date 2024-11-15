@@ -42,7 +42,27 @@ class ControllerCategory:
                 arc.writelines('\n')
 
 
+    def alterCatergory(self, categoryToAlter, categoryAltered):
+        x = DaoCategory.read()
 
+        cat = list(filter(lambda x: x.category == categoryToAlter, x))
 
+        if len(cat) > 0:
+            cat1 = list(filter(lambda x: x.category == categoryAltered, x))
 
+            if len(cat1) == 0:
+                x = list(map(lambda x: Category(categoryAltered) if(x.category == categoryToAlter) else(x), x ))
+                print(f'The category "{categoryToAlter}" was replaced by the new category "{categoryAltered}"')
+                
+            
+            else:
+                print(f'The category "{categoryAltered}" already exists')
+
+        else:
+            print(f'The category "{categoryToAlter}" does not exists')
+
+        with open('category.txt', 'w') as arc:
+            for i in x:
+                arc.writelines(i.category)
+                arc.writelines('\n')
 
