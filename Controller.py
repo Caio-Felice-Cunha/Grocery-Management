@@ -66,3 +66,15 @@ class ControllerCategory:
                 arc.writelines(i.category)
                 arc.writelines('\n')
 
+    def showCategory(self):
+        categories = DaoCategory.read()
+
+        if len(categories) == 0:
+            print('The category is empty')
+
+        else:
+            for i in categories:
+                print(f'Category: {i.category}')
+
+a = ControllerCategory()
+a.showCategory()
