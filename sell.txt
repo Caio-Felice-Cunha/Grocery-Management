@@ -1,0 +1,2 @@
+banana|5|fruits|Caio|Clara|3|14/11/2024
+banana|5|fruits|Caio|Clara|3|14/11/2024
