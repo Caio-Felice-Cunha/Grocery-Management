@@ -1,0 +1,48 @@
+from Models import *
+from DAO import *
+from datetime import datetime
+
+
+
+class ControllerCategory:
+    def registerCategory(self, newCategory):
+        exists = False
+        x = DaoCategory.read()
+
+        for i in x:
+            if i.category == newCategory:
+                exists = True
+            
+        if not exists:
+            DaoCategory.save(newCategory)
+            print(f"Category ({newCategory}) registered successfully")
+
+        else:
+            print(f"The Category {newCategory}, already exists")
+
+
+    def removeCategory(self, categoryToRemove):
+        x = DaoCategory.read()
+        cat = list(filter(lambda x: x.category == categoryToRemove, x))
+
+        if len(cat) <= 0:
+            print(f'The category {categoryToRemove}, does not exists')
+
+        else:
+            for i in range(len(x)):
+                if x[i].category == categoryToRemove:
+                    del x[i]
+                    break
+
+            print(f"The Category {categoryToRemove}, was successfully removed")
+
+        with open('category.txt', 'w') as arc:
+            for i in x:
+                arc.writelines(i.category)
+                arc.writelines('\n')
+
+
+
+
+
+
