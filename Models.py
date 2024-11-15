@@ -18,7 +18,7 @@ class Inventory:
         self.quantity = quantity
 
 class Sell:
-    def __init__(self, ItensSold: Products, salesperson: str, buyer: str, quantitySold: float, date = datetime.now()):
+    def __init__(self, ItensSold: Products, salesperson: str, buyer: str, quantitySold: float, date = datetime.now().strftime("%d/%m/%Y")):
         self.ItensSold = ItensSold
         self.salesperson = salesperson
         self.buyer = buyer
