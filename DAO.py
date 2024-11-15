@@ -75,28 +75,28 @@ class DaoInventory:
 
         return inv
         
-class DaoSuplier:
+class DaoSupplier:
     @classmethod
-    def save(cls, suplier = Suplier):
-        with open('suplier.txt', 'a') as arc:
-            arc.writelines(suplier.name + "|"
-                          + suplier.businessNumber + "|"
-                          + suplier.telephoneNumber + "|"
-                          + suplier.category)
+    def save(cls, supplier = Supplier):
+        with open('supplier.txt', 'a') as arc:
+            arc.writelines(supplier.name + "|"
+                          + supplier.businessNumber + "|"
+                          + supplier.telephoneNumber + "|"
+                          + supplier.category)
             
             arc.writelines('\n')
 
 
     def read(cls):
-        with open('suplier.txt', 'r') as arc:
-            cls.suplier = arc.readlines()
+        with open('supplier.txt', 'r') as arc:
+            cls.supplier = arc.readlines()
 
-        cls.suplier = list(map(lambda x: x.replace('\n', ''), cls.suplier))
-        cls.suplier = list(map(lambda x: x.split("|"), cls.suplier))
+        cls.supplier = list(map(lambda x: x.replace('\n', ''), cls.supplier))
+        cls.supplier = list(map(lambda x: x.split("|"), cls.supplier))
 
         sup = []
-        for i in cls.suplier:
-            sup.append(Suplier(i[0], i[1], i[2], i[3]))
+        for i in cls.supplier:
+            sup.append(Supplier(i[0], i[1], i[2], i[3]))
         
         return sup
 
