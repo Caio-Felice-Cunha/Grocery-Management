@@ -250,5 +250,5 @@ class ControllerSell:
 # a.registerProduct('pumpkin', '17', 'Vegetables', '6')
 # a.registerProduct('water', '34', 'Drinks', '21')
 
-# a = ControllerSell()
+a = ControllerSell()
 # a.registerSale('banana', 'joao', 'caio', 10)
