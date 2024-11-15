@@ -151,3 +151,24 @@ class ControllerInventory:
 
         else:
             print(f'The category {newCategory} does not exist')
+
+    def showInventory(self):
+        inventory = DaoInventory.read()
+
+        if len(inventory) == 0:
+            print('Empty inventory')
+        else:
+            print('======== Products ========')
+
+            for i in inventory:
+                print('\n'
+                      f'Nome: {i.product.name}\n'
+                      f'Price: {i.product.price}\n'
+                      f'Category: {i.product.category}\n'
+                      f'Quantity: {i.quantity}'
+                      )
+                
+                print('----------')
+
+a = ControllerInventory()
+a.showInventory()
