@@ -193,29 +193,62 @@ class ControllerSell:
 
                         DaoSell.save(sold)
 
-            temp.append([Products(i.product.name, i.product.price, i.product.category), i.quantity])
+            temp.append(Inventory(Products(i.product.name, i.product.price, i.product.category), i.quantity))
 
-            arc = open('inventory.txt', 'w')
-            arc.write("")
+        arc = open('inventory.txt', 'w')
+        arc.write("")
+    
+        for i in temp:
+            with open('inventory.txt', 'a') as arc:
+                arc.writelines(i.product.name + "|"
+                                + i.product.price  + "|"
+                                + i.product.category + "|"
+                                + str(i.quantity))
+                arc.writelines('\n')
+
+        if exist == False:
+            print(f'The product {productName} does not exist')
+            return None
+        elif not quantity:
+            print(f'Not enough of {productName} in the inventory.')
+            return None
+        else:
+            print(f'Sale completed successfully')
+            return saleValue
         
-            for i in temp:
-                with open('inventory.txt', 'a') as arc:
-                    arc.writelines(i[0].name + "|"
-                                   + i[0].price  + "|"
-                                   + i[0].category + "|"
-                                   + str(i[1]))
-                    arc.writelines('\n')
+    def productReport(self):
+        sales = DaoSell.read()
+        products = []
 
-            if exist == False:
-                print(f'The product {productName} does not exist')
-                return None
-            elif not quantity:
-                print(f'Not enough of {productName} in the inventory.')
-                return None
+        for i in sales:
+            name = i.ItensSold.name
+            quantity = i.quantitySold
+            size = list(filter(lambda x: x['product'] == name, products))
+
+            if len(size) > 0:
+                products = list(map(lambda x: {'product': name, 'quantity': x['quantity'] + quantity}) if(x['product'] == name) else(x), products)
             else:
-                print(f'Sale completed successfully')
-                return saleValue
-            
+                products.append({'product': name,
+                                 'quantity': quantity})
+                
+            ordered = sorted(products, key=lambda k: k['quantity'], reverse=True)
+
+            print('These are the best selling products')
+
+            for i in ordered:
+                print(f'===== Product: [{a}] =====')
+                print(f'Product: {i['product']} \n'
+                      f'Quantity: {i['quantity']} \n')
+                a += 1
 
 
-            
+
+# a = ControllerInventory()
+# a.registerProduct('banana', '5', 'Fruit', '20')
+# a.registerProduct('milk', '2', 'Drinks', '30')
+# a.registerProduct('hamburger', '25', 'Meats', '80')
+# a.registerProduct('pumpkin', '17', 'Vegetables', '6')
+# a.registerProduct('water', '34', 'Drinks', '21')
+
+# a = ControllerSell()
+# a.registerSale('banana', 'joao', 'caio', 10)
