@@ -117,6 +117,37 @@ class ControllerInventory:
                                + str(i.quantity))
         
 
+    def alterProduct(self, nameToAlter, newName, newPrice, newCategory, newQuantity):
+        x = DaoInventory.read()
+        y = DaoCategory.read()
 
-a = ControllerInventory()
-a.removeProduct('banana')
+        h = list(filter(lambda x: x.category == newCategory, y))
+
+        if len(h) > 0:
+            inv = list(filter(lambda x: x.product.name == nameToAlter, x))
+            
+            if len(inv) > 0:
+                inv = list(filter(lambda x: x.product.name == newName, x))
+
+                if len(inv) == 0:
+                    x = list(map(lambda x: Inventory(Products(newName, newPrice, newCategory), newQuantity) if(x.product.name == nameToAlter) else(x), x))
+
+                    print(f'Product {nameToAlter} successfully altered to: {newName, newPrice, newCategory, newQuantity}')
+                
+                else:
+                    print(f'The product {newName} is already registered')
+            
+            else:
+                print(f'The product {nameToAlter} does not exist')
+
+            with open('inventory.txt', 'w') as arc:
+                for i in x:
+                    arc.writelines(i.product.name + "|"
+                                   + i.product.price + "|"
+                                   + i.product.category + "|"
+                                   + str(i.quantity))
+                    
+                    arc.writelines('\n')
+
+        else:
+            print(f'The category {newCategory} does not exist')
