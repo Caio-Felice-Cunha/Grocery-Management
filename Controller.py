@@ -414,20 +414,83 @@ class ControllerClient:
                   f"SINumber: {i.SINumber}"
                   )
 
+class ControllerEmployee:
+    def registerEmployee(self, employeeNumber, name, telephoneNumber, SINumber, email, address):
+        x = DaoEmployee.read()
 
+        employeeNumberList = list(filter(lambda x: x.employeeNumber == employeeNumber, x))
+        SINumberList = list(filter(lambda x: x.SINumber == SINumber, x))
 
+        if len(SINumberList) > 0:
+            print(f"This SIN {SINumber} alreaty exist")
+        elif len(employeeNumberList) > 0:
+            print(f'This employee number {employeeNumber} already exist')
+        else:
+            if len(SINumber) == 11 and len(telephoneNumber) >= 10 and len(telephoneNumber) <= 11:
+                DaoEmployee.save(Employee(employeeNumber, name, telephoneNumber, SINumber, email, address))
+                print('Employee {name} successfully registered')
+            else:
+                print("Type a valid SIN or valid Telephone Number")
 
+    def alterEmployee(self, nameToAlter, newEmployeeNumber, newName, newTelephoneNumber, newSINumber, newEmail, newAdress)
+        x = DaoEmployee.read()
 
-# a = ControllerInventory()
-# a.registerProduct('banana', '5', 'Fruit', '20')
-# a.registerProduct('milk', '2', 'Drinks', '30')
-# a.registerProduct('hamburger', '25', 'Meats', '80')
-# a.registerProduct('pumpkin', '17', 'Vegetables', '6')
-# a.registerProduct('water', '34', 'Drinks', '21')
+        inv = list(filter(lambda x: x.name == nameToAlter, x))
 
-# a = ControllerSell()
-#  a.registerSale('hamburger', 'john', 'claire', 25)
-# a.productReport()
+        if len(inv) > 0:
+            x = list(map(lambda x: Employee(newEmployeeNumber, newName, newTelephoneNumber, newSINumber, newEmail, newAdress) if(x.name == nameToAlter) else(x), x))
 
-# a = ControllerSell()
-# a.showSale("01/10/2024", "01/11/2024")
+        else:
+            print(f'The employee {newName} already exists')
+
+        with open('employees.txt', 'w') as arc:
+            for i in x:
+                arc.writelines(i.employeeNumber + "|"
+                               + i.name + "|"
+                               + i.telephoneNumber + "|"
+                               + i.SINumber + "|"
+                               + i.email + "|"
+                               + i.address)
+            print(f'Employee {newName} successfully altered')
+
+    def removeEmployee(self, name):
+        x = DaoEmployee.read()
+
+        inv = list(filter(lambda x: x.name == name, x))
+        if len(inv) > 0:
+            for i in range(len(x)):
+                if x[i].name == name:
+                    del x[i]
+                    break
+
+        else:
+            print(f'The employee {name} that you want to remove does not exist')
+            return None 
+        
+        with open('employees.txt', 'w') as arc:
+            for i in x:
+                arc.writelines(i.name  + "|"
+                               + i.telephoneNumber + "|"
+                               + i.SINumber + "|"
+                               + i.email + "|"
+                               + i.address
+                               )
+                arc.writelines('\n')
+
+            print(f'Employee {name} sucessfully removed')
+
+    def showEmployee(self):
+        employee = DaoEmployee.read()
+
+        if len(employee) == 0:
+            print('Employees list empty')
+        
+        for i in employee:
+            print("===== Employee =====")
+            print(f"Name: {i.name}\n"
+                  f"Phone Number: {i.telephoneNumber}\n"
+                  f"Adress: {i.adress}\n"
+                  f"E-mail: {i.email}\n"
+                  f"SINumber: {i.SINumber}\n"
+                  f"Employee Number: {i.employeeNumber}\n"
+                  )
