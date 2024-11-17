@@ -40,6 +40,17 @@ class ControllerCategory:
                 arc.writelines(i.category)
                 arc.writelines('\n')
 
+        inventory = DaoInventory.read()
+
+        inventory = list(map(lambda x: Inventory(Products(x.product.name, x.product.price, "Category not defined"), x.quantity) if(x.product.category == categoryToRemove) else(x), inventory))
+
+        with open('inventory.txt', 'w') as arc:
+            for i in inventory:
+                arc.writelines(i.product.name + "|"
+                               + i.product.price + "|"
+                               + i.product.category + "|"
+                               + str(i.quantity))
+                arc.writelines('\n')
 
     def alterCatergory(self, categoryToAlter, categoryAltered):
         x = DaoCategory.read()
@@ -53,6 +64,24 @@ class ControllerCategory:
                 x = list(map(lambda x: Category(categoryAltered) if(x.category == categoryToAlter) else(x), x ))
                 print(f'The category "{categoryToAlter}" was replaced by the new category "{categoryAltered}"')
                 
+                
+
+                inventory = DaoInventory.read()
+
+                inventory = list(map(lambda x: Inventory(Products(x.product.name, x.product.price, categoryAltered), x.quantity) if(x.product.category == categoryToAlter) else(x), inventory))
+
+                with open('inventory.txt', 'w') as arc:
+                    for i in inventory:
+                        arc.writelines(i.product.name + "|"
+                                    + i.product.price + "|"
+                                    + i.product.category + "|"
+                                    + str(i.quantity))
+                        arc.writelines('\n')
+
+
+
+
+
             
             else:
                 print(f'The category "{categoryAltered}" already exists')
@@ -432,7 +461,7 @@ class ControllerEmployee:
             else:
                 print("Type a valid SIN or valid Telephone Number")
 
-    def alterEmployee(self, nameToAlter, newEmployeeNumber, newName, newTelephoneNumber, newSINumber, newEmail, newAdress)
+    def alterEmployee(self, nameToAlter, newEmployeeNumber, newName, newTelephoneNumber, newSINumber, newEmail, newAdress):
         x = DaoEmployee.read()
 
         inv = list(filter(lambda x: x.name == nameToAlter, x))
@@ -494,3 +523,8 @@ class ControllerEmployee:
                   f"SINumber: {i.SINumber}\n"
                   f"Employee Number: {i.employeeNumber}\n"
                   )
+            
+
+
+a = ControllerCategory()
+a.alterCatergory("Category not defined", "Meats")
