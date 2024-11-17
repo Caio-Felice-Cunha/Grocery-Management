@@ -219,6 +219,7 @@ class ControllerSell:
     def productReport(self):
         sales = DaoSell.read()
         products = []
+        ordered = []
 
         for i in sales:
             name = i.ItensSold.name
@@ -226,20 +227,194 @@ class ControllerSell:
             size = list(filter(lambda x: x['product'] == name, products))
 
             if len(size) > 0:
-                products = list(map(lambda x: {'product': name, 'quantity': x['quantity'] + quantity}) if(x['product'] == name) else(x), products)
+                products = list(map(lambda x: {'product': name, 'quantity': int(x['quantity']) + int(quantity)} if(x['product'] == name) else(x), products))
             else:
                 products.append({'product': name,
-                                 'quantity': quantity})
+                                 'quantity': int(quantity)})
                 
-            ordered = sorted(products, key=lambda k: k['quantity'], reverse=True)
+        ordered = sorted(products, key=lambda k: k['quantity'], reverse=True)
 
-            print('These are the best selling products')
+        print('These are the best selling products')
+        a = 1
+        for i in ordered:
+            print(f'===== Product: [{a}] =====')
+            print(f'Product: {i['product']} \n'
+                    f'Quantity: {i['quantity']} \n')
+            a += 1
 
-            for i in ordered:
-                print(f'===== Product: [{a}] =====')
-                print(f'Product: {i['product']} \n'
-                      f'Quantity: {i['quantity']} \n')
-                a += 1
+    def showSale(self, startDate, endDate):
+        sales = DaoSell.read()
+        startDate1 = datetime.strptime(startDate, '%d/%m/%Y')
+        endDate1 =  datetime.strptime(endDate, '%d/%m/%Y')
+
+        selectedSales = list(filter(lambda x: datetime.strptime(x.date, '%d/%m/%Y') >= startDate1 and datetime.strptime(x.date, '%d/%m/%Y') <= endDate1, sales))
+
+        cont = 1
+        total = 0
+
+        for i in selectedSales:
+            print(f"===== Sale [{cont}] =====")
+            print(f"Name: {i.ItensSold.name}\n"
+                  f"Category: {i.ItensSold.category}\n"
+                  f"Date: {i.date}\n"
+                  f"Quantity: {i.quantitySold}\n"
+                  f"Client: {i.buyer}\n"
+                  f"Salesperson: {i.salesperson}\n")
+            total += int(i.ItensSold.price) * int(i.quantitySold)
+            cont += 1
+        print(f'Total: {total}')
+
+class ControllerSupplier:
+    def registerSupplier(self, name, businessNumber, telephoneNumber, category):
+        x = DaoSupplier.read()
+
+        businessNumberList = list(filter(lambda x: x.businessNumber == businessNumber, x))
+
+        telephoneNumberList = list(filter(lambda x: x.telephoneNumber == telephoneNumber, x))
+
+        if len(businessNumberList) > 0:
+            print(f"This business number {businessNumber} already exist")
+        elif len(telephoneNumber) > 0:
+            print(f"This telephone number {telephoneNumber} already exist")
+        else:
+            if len(businessNumber) == 14 and len(telephoneNumber) <= 11 and len(telephoneNumber) >= 10:
+                DaoSupplier.save(Supplier(name, businessNumber, telephoneNumber, category))
+            else:
+                print("Type a valid business number or a telephone number")
+
+    def alterSupplier(self, alterName, newName, newBusinessNumber, newTelephoneNumber, newCategory):
+        x = DaoSupplier.read()
+
+        inv = list(filter(lambda x: x.name == alterName, x))
+
+        if len(inv) > 0:
+            inv = list(filter(lambda x: x.businessNumber == newBusinessNumber, x))
+
+            if len(inv) == 0:
+                x = list(map(lambda x: Supplier(newName, newBusinessNumber, newTelephoneNumber, newCategory) if(x.supplier.name == newName) else(x), x))#########################
+
+            else:
+                print(f'This business number {newBusinessNumber}, already exists')
+        
+        else:
+            print(f'The supplier {alterName} that you want to alter, does not exists')
+
+        with open('supplier.txt', 'w') as arc:
+            for i in x:
+                arc.writelines
+
+
+    def removeSupplier(self, name):
+        x = DaoSupplier.read()
+
+        inv = list(filter(lambda x: x.name == name, x))
+
+        if len(inv) > 0:
+            for i in range(len(x)):
+                if x[i].name == name:
+                    del x[i]
+                    break
+
+        else:
+            print(f'The supllier {name}, that you want to remove does not exist')
+            return None 
+        
+        with open('supplier.txt', 'w') as arc:
+            for i in x:
+                arc.writelines(i.name + "|"
+                               + i.businessNumber + "|"
+                               + i.telephoneNumber + "|"
+                               + str(i.category))
+                arc.writelines('\n')
+            
+            print(f'Supplier {name} successfully removed')
+
+    def showSuppliers(self):
+        suppliers = DaoSupplier.read()
+        if len(suppliers) == 0:
+            print('Suppliers list is empty')
+
+        for i in suppliers:
+            print("========== Suppliers ==========")
+            print(f"Category provided: {i.category}\n"
+                  f"Name: {i.name}\n"
+                  f"Telephone Number: {i.telephoneNumber}\n"
+                  f"Business Number: {i.businessNumber}\n")
+
+class ControllerClient:
+    def registerClient(self, name, telephoneNumber, SINumber, email, address):
+        x = DaoPerson.read()
+
+        SINumberList = list(filter(lambda x: x.SINumber == SINumber, x))
+        if len(SINumberList) > 0:
+            print(f'SINumber {SINumber} already exist')
+        
+        else:
+            if len(SINumber) == 9 and len(telephoneNumber) >= 10 and len(telephoneNumber) <= 11:
+                DaoPerson.save(Person(name, telephoneNumber, SINumber, email, address))
+                print(f'Client {name} successfully registered')
+            else:
+                print('Telephone number or SINumber not valid')
+
+    def alterClient(self, nameToAlter, newName, newTelephoneNumber, newSINumber, newEmail, newAddress):
+        x = DaoPerson.read()
+
+        inv = list(filter(lambda x: x.name == nameToAlter, x))
+        if len(inv) > 0:
+            x = list(map(lambda x: Person(newName, newTelephoneNumber, newSINumber, newEmail, newAddress) if(x.name == nameToAlter) else(x), x ))
+        else:
+            print('The clientthat you want to alter does not exist')
+
+        with open('çlients.txt', 'w') as arc:
+            for i in x:
+                arc.writelines(i.name + "|"
+                               + i.newTelephoneNumber  + "|"
+                               + i.SINumber  + "|"
+                               + i.email  + "|"
+                               + i.address)
+                arc.writelines('\n')
+            print(f'Client {nameToAlter} successfully altered to {newName}')
+
+    def removeClient(cls, name):
+        x = DaoPerson.read()
+
+        inv = list(filter(lambda x: x.name == name, x))
+
+        if len(inv) > 0:
+            for i in range(len(x)):
+                if x[i].name == name:
+                    del x[i]
+                    break 
+
+        else:
+            print('The client {name} that you want to alter does not exist')
+            return None 
+        
+        with open('clients.txt', 'w') as arc:
+            for i in x:
+                arc.writelines(i.name + "|"
+                               + i.telephoneNumber + "|"
+                               + i.SINumber + "|"
+                               + i.email + "|"
+                               + i.adress)
+            print('Client {name} successfully removed')
+
+    def showClients(self):
+        clients = DaoPerson.read()
+
+        if len(clients) == 0:
+            print('The clients list is empty')
+
+        for i in clients:
+            print('===== Client =====')
+            print(f"Name: {i.name}\n"
+                  f"Phone Number: {i.telephoneNumber}\n"
+                  f"Adress: {i.adress}\n"
+                  f"E-mail: {i.email}\n"
+                  f"SINumber: {i.SINumber}"
+                  )
+
+
 
 
 
@@ -250,5 +425,9 @@ class ControllerSell:
 # a.registerProduct('pumpkin', '17', 'Vegetables', '6')
 # a.registerProduct('water', '34', 'Drinks', '21')
 
-a = ControllerSell()
-# a.registerSale('banana', 'joao', 'caio', 10)
+# a = ControllerSell()
+#  a.registerSale('hamburger', 'john', 'claire', 25)
+# a.productReport()
+
+# a = ControllerSell()
+# a.showSale("01/10/2024", "01/11/2024")
