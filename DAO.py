@@ -71,7 +71,7 @@ class DaoInventory:
         inv=[]
         if len(cls.inventory) > 0:
             for i in cls.inventory:
-                inv.append(Inventory(Products(i[0], i[1], i[2]), i[3]))
+                inv.append(Inventory(Products(i[0], i[1], i[2]), int(i[3])))
 
         return inv
         
