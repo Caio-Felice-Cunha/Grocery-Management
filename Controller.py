@@ -63,8 +63,6 @@ class ControllerCategory:
             if len(cat1) == 0:
                 x = list(map(lambda x: Category(categoryAltered) if(x.category == categoryToAlter) else(x), x ))
                 print(f'The category "{categoryToAlter}" was replaced by the new category "{categoryAltered}"')
-                
-                
 
                 inventory = DaoInventory.read()
 
@@ -77,12 +75,7 @@ class ControllerCategory:
                                     + i.product.category + "|"
                                     + str(i.quantity))
                         arc.writelines('\n')
-
-
-
-
-
-            
+ 
             else:
                 print(f'The category "{categoryAltered}" already exists')
 
@@ -523,8 +516,4 @@ class ControllerEmployee:
                   f"SINumber: {i.SINumber}\n"
                   f"Employee Number: {i.employeeNumber}\n"
                   )
-            
-
-
-a = ControllerCategory()
-a.alterCatergory("Category not defined", "Meats")
+        
