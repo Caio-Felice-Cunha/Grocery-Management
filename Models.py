@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 class Category:
     def __init__(self, category):
         self.category = category
@@ -25,7 +24,7 @@ class Sell:
         self.quantitySold = quantitySold
         self.date = date
 
-class Suplier:
+class Supplier:
     def __init__(self, name:str, businessNumber: str, telephoneNumber: str, category: str):
         self.name = name
         self.businessNumber = businessNumber
