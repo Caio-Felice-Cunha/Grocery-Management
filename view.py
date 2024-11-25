@@ -69,8 +69,11 @@ if __name__ == "__main__":
                 ))
 
                 if decide == 1:
-                    product = input("Type the product that you want to register\n")
-                    cat.registerProduct(product)
+                    name = input("Type the product name: \n")
+                    price = input("Type the product price: \n")
+                    category = input("Type the product category: \n")
+                    quantity = input("Type the product quantity: \n")
+                    cat.registerProduct(name, price, category, quantity)
 
                 elif decide == 2:
                     product = input("Type the product the you want to remove\n")

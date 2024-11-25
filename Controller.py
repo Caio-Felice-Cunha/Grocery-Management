@@ -5,6 +5,16 @@ from datetime import datetime
 
 class ControllerCategory:
     def registerCategory(self, newCategory):
+        """
+        Register a new category in the system.
+        
+        Args:
+            newCategory (str): Name of the new category
+        """
+        if not newCategory or not isinstance(newCategory, str):
+            print("Category name must be a non-empty string")
+            return
+
         exists = False
         x = DaoCategory.read()
 
@@ -52,7 +62,7 @@ class ControllerCategory:
                                + str(i.quantity))
                 arc.writelines('\n')
 
-    def alterCatergory(self, categoryToAlter, categoryAltered):
+    def alterCategory(self, categoryToAlter, categoryAltered):
         x = DaoCategory.read()
 
         cat = list(filter(lambda x: x.category == categoryToAlter, x))
@@ -99,6 +109,29 @@ class ControllerCategory:
 
 class ControllerInventory:
     def registerProduct(self, name, price, category, quantity):
+        """
+        Register a new product in the inventory.
+        
+        Args:
+            name (str): Product name
+            price (str): Product price
+            category (str): Product category
+            quantity (int): Initial quantity
+        """
+        if not all([name, price, category, quantity]):
+            print("All fields are required")
+            return
+
+        try:
+            quantity = int(quantity)
+            float(price)  # Validate price is a number
+            if quantity < 0:
+                print("Quantity cannot be negative")
+                return
+        except ValueError:
+            print("Price and quantity must be numbers")
+            return
+
         x = DaoInventory.read()
         y = DaoCategory.read()
 
@@ -110,7 +143,6 @@ class ControllerInventory:
                 product = Products(name, price, category)
                 DaoInventory.save(product, quantity)
                 print(f'Product {name} successfully registered')
-            
             else: 
                 print(f'The product {name} is already registered')
         else:
@@ -127,17 +159,16 @@ class ControllerInventory:
                     del x[i]
                     break
             print(f'The product {name} was removed successfully')
-
         else:
             print(f'The product {name} does not exist')
+            return
 
         with open('inventory.txt', 'w') as arc:
             for i in x: 
                 arc.writelines(i.product.name + "|"
                                + i.product.price + "|"
                                + i.product.category + "|"
-                               + str(i.quantity))
-        
+                               + str(i.quantity) + "\n")
 
     def alterProduct(self, nameToAlter, newName, newPrice, newCategory, newQuantity):
         x = DaoInventory.read()
@@ -194,50 +225,63 @@ class ControllerInventory:
 
 class ControllerSell:
     def registerSale(self, productName, salesperson, buyer, saleQuantity):
+        """
+        Register a new sale in the system.
+        
+        Args:
+            productName (str): Name of the product being sold
+            salesperson (str): Name of the employee making the sale
+            buyer (str): Name of the client making the purchase
+            saleQuantity (int): Quantity of product being sold
+        
+        Returns:
+            float or None: Total sale value if successful, None if failed
+        """
+        if not all([productName, salesperson, buyer, saleQuantity]):
+            print("All fields are required")
+            return None
+
+        try:
+            saleQuantity = int(saleQuantity)
+            if saleQuantity <= 0:
+                print("Sale quantity must be positive")
+                return None
+        except ValueError:
+            print("Sale quantity must be a number")
+            return None
+
         x = DaoInventory.read()
         temp = []
-
         exist = False
-        quantity = False 
+        quantity = False
+        saleValue = None
 
-        for i in x:
-            if exist == False:
-
-                if i.product.name == productName:
+        with open('inventory.txt', 'w') as arc:
+            for i in x:
+                if not exist and i.product.name == productName:
                     exist = True
-
                     if i.quantity >= saleQuantity:
                         quantity = True
-                        i.quantity = int(i.quantity) - int(saleQuantity)
-
-                        sold = Sell(Products(i.product.name, i.product.price, i.product.category), salesperson, buyer, saleQuantity)
-                        saleValue = int(saleQuantity) * int(i.product.price)
-
+                        i.quantity = int(i.quantity) - saleQuantity
+                        sold = Sell(Products(i.product.name, i.product.price, i.product.category), 
+                                  salesperson, buyer, saleQuantity)
+                        saleValue = saleQuantity * int(i.product.price)
                         DaoSell.save(sold)
 
-            temp.append(Inventory(Products(i.product.name, i.product.price, i.product.category), i.quantity))
+                temp.append(Inventory(Products(i.product.name, i.product.price, i.product.category), 
+                                    i.quantity))
+                
+                arc.write(f"{i.product.name}|{i.product.price}|{i.product.category}|{i.quantity}\n")
 
-        arc = open('inventory.txt', 'w')
-        arc.write("")
-    
-        for i in temp:
-            with open('inventory.txt', 'a') as arc:
-                arc.writelines(i.product.name + "|"
-                                + i.product.price  + "|"
-                                + i.product.category + "|"
-                                + str(i.quantity))
-                arc.writelines('\n')
-
-        if exist == False:
+        if not exist:
             print(f'The product {productName} does not exist')
-            return None
         elif not quantity:
             print(f'Not enough of {productName} in the inventory.')
-            return None
         else:
-            print(f'Sale completed successfully')
-            return saleValue
-        
+            print('Sale completed successfully')
+            
+        return saleValue
+
     def productReport(self):
         sales = DaoSell.read()
         products = []
@@ -265,11 +309,36 @@ class ControllerSell:
             a += 1
 
     def showSale(self, startDate, endDate):
-        sales = DaoSell.read()
-        startDate1 = datetime.strptime(startDate, '%d/%m/%Y')
-        endDate1 =  datetime.strptime(endDate, '%d/%m/%Y')
+        """
+        Show sales between two dates.
+        
+        Args:
+            startDate (str): Start date in dd/mm/yyyy format
+            endDate (str): End date in dd/mm/yyyy format
+        """
+        if not startDate or not endDate:
+            print("Both dates are required")
+            return
 
-        selectedSales = list(filter(lambda x: datetime.strptime(x.date, '%d/%m/%Y') >= startDate1 and datetime.strptime(x.date, '%d/%m/%Y') <= endDate1, sales))
+        try:
+            startDate1 = datetime.strptime(startDate, '%d/%m/%Y')
+            endDate1 = datetime.strptime(endDate, '%d/%m/%Y')
+            
+            if endDate1 < startDate1:
+                print("End date cannot be before start date")
+                return
+            
+        except ValueError:
+            print("Invalid date format. Use dd/mm/yyyy")
+            return
+
+        sales = DaoSell.read()
+        selectedSales = list(filter(lambda x: datetime.strptime(x.date, '%d/%m/%Y') >= startDate1 
+                                   and datetime.strptime(x.date, '%d/%m/%Y') <= endDate1, sales))
+
+        if not selectedSales:
+            print("No sales found in this period")
+            return
 
         cont = 1
         total = 0
@@ -288,6 +357,10 @@ class ControllerSell:
 
 class ControllerSupplier:
     def registerSupplier(self, name, businessNumber, telephoneNumber, category):
+        if not name or not businessNumber or not telephoneNumber or not category:
+            print("All fields are required")
+            return
+
         x = DaoSupplier.read()
 
         businessNumberList = list(filter(lambda x: x.businessNumber == businessNumber, x))
@@ -305,26 +378,31 @@ class ControllerSupplier:
                 print("Type a valid business number or a telephone number")
 
     def alterSupplier(self, alterName, newName, newBusinessNumber, newTelephoneNumber, newCategory):
-        x = DaoSupplier.read()
+        if not all([alterName, newName, newBusinessNumber, newTelephoneNumber, newCategory]):
+            print("All fields are required")
+            return
 
+        x = DaoSupplier.read()
         inv = list(filter(lambda x: x.name == alterName, x))
 
         if len(inv) > 0:
             inv = list(filter(lambda x: x.businessNumber == newBusinessNumber, x))
 
             if len(inv) == 0:
-                x = list(map(lambda x: Supplier(newName, newBusinessNumber, newTelephoneNumber, newCategory) if(x.supplier.name == newName) else(x), x))#########################
-
+                x = list(map(lambda x: Supplier(newName, newBusinessNumber, newTelephoneNumber, newCategory) 
+                            if(x.name == alterName) else(x), x))
+                
+                with open('supplier.txt', 'w') as arc:
+                    for i in x:
+                        arc.writelines(i.name + "|"
+                                    + i.businessNumber + "|"
+                                    + i.telephoneNumber + "|"
+                                    + i.category + "\n")
+                print(f'Supplier {alterName} successfully altered to {newName}')
             else:
                 print(f'This business number {newBusinessNumber}, already exists')
-        
         else:
-            print(f'The supplier {alterName} that you want to alter, does not exists')
-
-        with open('supplier.txt', 'w') as arc:
-            for i in x:
-                arc.writelines
-
+            print(f'The supplier {alterName} that you want to alter, does not exist')
 
     def removeSupplier(self, name):
         x = DaoSupplier.read()
@@ -383,23 +461,27 @@ class ControllerClient:
 
         inv = list(filter(lambda x: x.name == nameToAlter, x))
         if len(inv) > 0:
-            x = list(map(lambda x: Person(newName, newTelephoneNumber, newSINumber, newEmail, newAddress) if(x.name == nameToAlter) else(x), x ))
+            x = list(map(lambda x: Person(newName, newTelephoneNumber, newSINumber, newEmail, newAddress) if(x.name == nameToAlter) else(x), x))
         else:
-            print('The clientthat you want to alter does not exist')
+            print('The client that you want to alter does not exist')
+            return
 
-        with open('çlients.txt', 'w') as arc:
+        with open('clients.txt', 'w') as arc:
             for i in x:
                 arc.writelines(i.name + "|"
-                               + i.newTelephoneNumber  + "|"
-                               + i.SINumber  + "|"
-                               + i.email  + "|"
+                               + i.telephoneNumber + "|"
+                               + i.SINumber + "|"
+                               + i.email + "|"
                                + i.address)
                 arc.writelines('\n')
             print(f'Client {nameToAlter} successfully altered to {newName}')
 
-    def removeClient(cls, name):
-        x = DaoPerson.read()
+    def removeClient(self, name):
+        if not name:
+            print("Client name is required")
+            return
 
+        x = DaoPerson.read()
         inv = list(filter(lambda x: x.name == name, x))
 
         if len(inv) > 0:
@@ -407,9 +489,8 @@ class ControllerClient:
                 if x[i].name == name:
                     del x[i]
                     break 
-
         else:
-            print('The client {name} that you want to alter does not exist')
+            print(f'The client {name} that you want to alter does not exist')
             return None 
         
         with open('clients.txt', 'w') as arc:
@@ -418,20 +499,21 @@ class ControllerClient:
                                + i.telephoneNumber + "|"
                                + i.SINumber + "|"
                                + i.email + "|"
-                               + i.adress)
-            print('Client {name} successfully removed')
+                               + i.address + "\n")
+            print(f'Client {name} successfully removed')
 
     def showClients(self):
         clients = DaoPerson.read()
 
         if len(clients) == 0:
             print('The clients list is empty')
+            return
 
         for i in clients:
             print('===== Client =====')
             print(f"Name: {i.name}\n"
                   f"Phone Number: {i.telephoneNumber}\n"
-                  f"Adress: {i.adress}\n"
+                  f"Address: {i.address}\n"
                   f"E-mail: {i.email}\n"
                   f"SINumber: {i.SINumber}"
                   )
@@ -450,7 +532,7 @@ class ControllerEmployee:
         else:
             if len(SINumber) == 11 and len(telephoneNumber) >= 10 and len(telephoneNumber) <= 11:
                 DaoEmployee.save(Employee(employeeNumber, name, telephoneNumber, SINumber, email, address))
-                print('Employee {name} successfully registered')
+                print(f'Employee {name} successfully registered')
             else:
                 print("Type a valid SIN or valid Telephone Number")
 
@@ -484,34 +566,34 @@ class ControllerEmployee:
                 if x[i].name == name:
                     del x[i]
                     break
-
         else:
             print(f'The employee {name} that you want to remove does not exist')
             return None 
         
         with open('employees.txt', 'w') as arc:
             for i in x:
-                arc.writelines(i.name  + "|"
+                arc.writelines(i.employeeNumber + "|"
+                               + i.name + "|"
                                + i.telephoneNumber + "|"
                                + i.SINumber + "|"
                                + i.email + "|"
-                               + i.address
-                               )
-                arc.writelines('\n')
+                               + i.address)
+            arc.writelines('\n')
 
-            print(f'Employee {name} sucessfully removed')
+            print(f'Employee {name} successfully removed')
 
     def showEmployee(self):
         employee = DaoEmployee.read()
 
         if len(employee) == 0:
             print('Employees list empty')
+            return
         
         for i in employee:
             print("===== Employee =====")
             print(f"Name: {i.name}\n"
                   f"Phone Number: {i.telephoneNumber}\n"
-                  f"Adress: {i.adress}\n"
+                  f"Address: {i.address}\n"
                   f"E-mail: {i.email}\n"
                   f"SINumber: {i.SINumber}\n"
                   f"Employee Number: {i.employeeNumber}\n"
